@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Plus } from "lucide-react"
+import { Plus, Trash2 } from "lucide-react"
 
 interface CheckEntry {
   name: string
@@ -17,9 +17,18 @@ interface InfoCardProps {
   lastChecked: CheckEntry[]
   checkOn: BedEntry[]
   onAddPatient: () => void
+  onDeleteMode: () => void
+  isDeleteMode: boolean
 }
 
-export function InfoCard({ patientCount, lastChecked, checkOn, onAddPatient }: InfoCardProps) {
+export function InfoCard({
+  patientCount,
+  lastChecked,
+  checkOn,
+  onAddPatient,
+  onDeleteMode,
+  isDeleteMode,
+}: InfoCardProps) {
   return (
     <div className="space-y-4">
       <Card>
@@ -61,10 +70,25 @@ export function InfoCard({ patientCount, lastChecked, checkOn, onAddPatient }: I
         </CardContent>
       </Card>
 
-      <Button onClick={onAddPatient} className="w-full flex items-center gap-2">
-        <Plus className="w-4 h-4" />
-        Add New Patient
-      </Button>
+      <div className="space-y-2">
+        <Button
+          onClick={onAddPatient}
+          className="w-full flex items-center gap-2"
+          style={{ backgroundColor: "#22c55e", color: "white" }}
+          disabled={isDeleteMode}
+        >
+          <Plus className="w-4 h-4" />
+          Add New
+        </Button>
+        <Button
+          onClick={onDeleteMode}
+          variant={isDeleteMode ? "default" : "destructive"}
+          className="w-full flex items-center gap-2"
+        >
+          <Trash2 className="w-4 h-4" />
+          {isDeleteMode ? "Cancel Delete" : "Delete Patient"}
+        </Button>
+      </div>
     </div>
   )
 }

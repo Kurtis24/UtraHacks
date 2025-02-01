@@ -5,43 +5,18 @@ import { PatientCard } from "./components/patient-card"
 import { InfoCard } from "./components/info-card"
 import { NewPatientDialog } from "./components/new-patient-dialog"
 import { useToast } from "@/components/ui/use-toast"
+import type { Patient, PatientStatus } from "./types/api"
 
-interface Patient {
-  name: string
-  heartRate: number
-  age: number
-  bed: number
-  status: "good" | "alert"
-  notes: string
-}
+// Start with empty patients array
+const initialPatients: Patient[] = []
 
-// Sample data
-const initialPatients: Patient[] = Array.from({ length: 12 }, (_, i) => ({
-  name: `Name ${i + 5}`,
-  heartRate: 120,
-  age: 12,
-  bed: i === 2 ? 3 : 1,
-  status: i === 2 || i === 5 ? "alert" : "good",
-  notes: "",
-}))
-
-const lastChecked = [
-  { name: "John Doe", time: "12:44" },
-  { name: "John Doe", time: "12:40" },
-  { name: "John Doe", time: "12:35" },
-  { name: "John Doe", time: "12:30" },
-  { name: "John Doe", time: "12:25" },
-]
-
-const checkOn = [
-  { name: "John Doe", bed: "Bed 1" },
-  { name: "John Doe", bed: "Bed 2" },
-  { name: "John Doe", bed: "Bed 1" },
-]
+const lastChecked: Array<{ name: string; time: string }> = []
+const checkOn: Array<{ name: string; bed: string }> = []
 
 export default function Dashboard() {
   const [patients, setPatients] = useState<Patient[]>(initialPatients)
   const [isNewPatientDialogOpen, setIsNewPatientDialogOpen] = useState(false)
+  const [isDeleteMode, setIsDeleteMode] = useState(false)
   const { toast } = useToast()
 
   const handleNotesChange = (index: number, newNotes: string) => {
@@ -53,6 +28,29 @@ export default function Dashboard() {
       }
       return newPatients
     })
+  }
+
+  const handleStatusChange = (index: number, newStatus: PatientStatus) => {
+    setPatients((prevPatients) => {
+      const newPatients = [...prevPatients]
+      newPatients[index] = {
+        ...newPatients[index],
+        status: newStatus,
+      }
+      return newPatients
+    })
+
+    // Update lastChecked when status changes
+    const patient = patients[index]
+    const currentTime = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+
+    setLastChecked((prev) => [
+      {
+        name: patient.name,
+        time: currentTime,
+      },
+      ...prev.slice(0, 4),
+    ]) // Keep only last 5 checks
   }
 
   const handleAddPatient = (newPatient: Omit<Patient, "notes">) => {
@@ -75,6 +73,19 @@ export default function Dashboard() {
       })
       return newPatients
     })
+    // Exit delete mode if no patients left
+    if (patients.length <= 1) {
+      setIsDeleteMode(false)
+    }
+  }
+
+  const toggleDeleteMode = () => {
+    setIsDeleteMode(!isDeleteMode)
+  }
+
+  const setLastChecked = (newLastChecked: Array<{ name: string; time: string }>) => {
+    lastChecked.length = 0
+    lastChecked.push(...newLastChecked)
   }
 
   return (
@@ -85,19 +96,24 @@ export default function Dashboard() {
           lastChecked={lastChecked}
           checkOn={checkOn}
           onAddPatient={() => setIsNewPatientDialogOpen(true)}
+          onDeleteMode={toggleDeleteMode}
+          isDeleteMode={isDeleteMode}
         />
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {patients.map((patient, i) => (
             <PatientCard
-              key={i}
+              key={patient.id}
+              id={patient.id}
               name={patient.name}
-              heartRate={patient.heartRate}
+              initialHeartRate={patient.heartRate}
               age={patient.age}
               bed={patient.bed}
               status={patient.status}
               notes={patient.notes}
               onNotesChange={(notes) => handleNotesChange(i, notes)}
               onDelete={() => handleDeletePatient(i)}
+              isDeleteMode={isDeleteMode}
+              onStatusChange={(status) => handleStatusChange(i, status)}
             />
           ))}
         </div>

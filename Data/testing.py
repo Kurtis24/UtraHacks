@@ -1,4 +1,5 @@
 import pandas as pd
+import random
 
 # Generate random sample data
 data = [
@@ -6,6 +7,8 @@ data = [
     for i in range(10)
 ]
 
-# Convert to DataFrame and save as CSV
+# Save to CSV
 df = pd.DataFrame(data)
 df.to_csv("last_checked.csv", index=False)
+
+print("CSV file 'last_checked.csv' created successfully.")

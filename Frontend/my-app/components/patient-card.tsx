@@ -1,59 +1,102 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Card, CardContent } from "@/components/ui/card"
 import { NotesDialog } from "./notes-dialog"
 import { Button } from "@/components/ui/button"
-import { Trash2 } from "lucide-react"
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog"
+import { X } from "lucide-react"
+import { getPatientVitals, determineStatus } from "../services/vitalsService"
+import type { PatientStatus } from "../types/api"
 
 interface PatientCardProps {
+  id: string
   name: string
-  heartRate: number
+  initialHeartRate: number
   age: number
   bed: number
-  status: "good" | "alert"
+  status: PatientStatus
   notes?: string
   onNotesChange?: (notes: string) => void
   onDelete?: () => void
+  isDeleteMode?: boolean
+  onStatusChange?: (status: PatientStatus) => void
+}
+
+const getStatusColor = (status: PatientStatus) => {
+  switch (status) {
+    case "good":
+      return "bg-green-500"
+    case "warning":
+      return "bg-yellow-500"
+    case "alert":
+      return "bg-red-500"
+    default:
+      return "bg-gray-500"
+  }
 }
 
 export function PatientCard({
+  id,
   name,
-  heartRate,
+  initialHeartRate,
   age,
   bed,
-  status,
+  status: initialStatus,
   notes = "",
   onNotesChange,
   onDelete,
+  isDeleteMode = false,
+  onStatusChange,
 }: PatientCardProps) {
   const [isDialogOpen, setIsDialogOpen] = useState(false)
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
+  const [heartRate, setHeartRate] = useState(initialHeartRate)
+  const [status, setStatus] = useState<PatientStatus>(initialStatus)
+
+  useEffect(() => {
+    const fetchVitals = async () => {
+      try {
+        const vitals = await getPatientVitals(id)
+        setHeartRate(vitals.heartRate)
+        const newStatus = determineStatus(vitals.heartRate)
+        setStatus(newStatus)
+        if (onStatusChange) {
+          onStatusChange(newStatus)
+        }
+      } catch (error) {
+        console.error("Error fetching vitals:", error)
+      }
+    }
+
+    const interval = setInterval(fetchVitals, 2000) // Update every 2 seconds
+
+    return () => clearInterval(interval)
+  }, [id, onStatusChange])
 
   return (
-    <>
-      <Card className="bg-white dark:bg-zinc-900 shadow-lg">
+    <div className="relative">
+      <Card className={`bg-white dark:bg-zinc-900 shadow-lg ${isDeleteMode ? "opacity-75" : ""}`}>
         <CardContent className="p-4">
           <div className="flex justify-between items-center mb-4">
             <h3 className="font-medium text-lg">{name}</h3>
             <button
-              onClick={() => setIsDialogOpen(true)}
+              onClick={() => !isDeleteMode && setIsDialogOpen(true)}
               className="w-12 h-6 bg-gray-200 dark:bg-gray-700 rounded-full hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
               aria-label="Open notes"
+              disabled={isDeleteMode}
             />
           </div>
           <div className="space-y-2">
-            <div className="flex justify-between">
+            <div className="flex justify-between items-center">
               <span className="text-gray-600 dark:text-gray-400">HR:</span>
-              <span className="font-medium">{heartRate}</span>
+              <span
+                className={`font-medium ${
+                  status === "alert"
+                    ? "text-red-500 animate-pulse"
+                    : status === "warning"
+                      ? "text-yellow-500"
+                      : "text-green-500"
+                }`}
+              >
+                {heartRate}
+              </span>
             </div>
             <div className="flex justify-between">
               <span className="text-gray-600 dark:text-gray-400">Age:</span>
@@ -65,17 +108,21 @@ export function PatientCard({
             </div>
             <div className="flex justify-between items-center">
               <span className="text-gray-600 dark:text-gray-400">Status:</span>
-              <div className={`w-4 h-4 rounded-full ${status === "good" ? "bg-green-500" : "bg-red-500"}`} />
+              <div className={`w-4 h-4 rounded-full ${getStatusColor(status)}`} />
             </div>
-          </div>
-          <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-            <Button variant="destructive" size="sm" className="w-full" onClick={() => setIsDeleteDialogOpen(true)}>
-              <Trash2 className="w-4 h-4 mr-2" />
-              Delete Patient
-            </Button>
           </div>
         </CardContent>
       </Card>
+
+      {isDeleteMode && (
+        <Button
+          variant="destructive"
+          className="absolute inset-0 w-full h-full flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity"
+          onClick={onDelete}
+        >
+          <X className="w-8 h-8" />
+        </Button>
+      )}
 
       <NotesDialog
         patientName={name}
@@ -84,30 +131,7 @@ export function PatientCard({
         initialNotes={notes}
         onSave={onNotesChange || (() => {})}
       />
-
-      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Delete Patient</AlertDialogTitle>
-            <AlertDialogDescription>
-              Are you sure you want to delete {name}? This action cannot be undone.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={() => {
-                onDelete?.()
-                setIsDeleteDialogOpen(false)
-              }}
-              className="bg-red-500 hover:bg-red-600"
-            >
-              Delete
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-    </>
+    </div>
   )
 }
 

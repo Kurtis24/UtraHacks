@@ -3,26 +3,19 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-
-interface NewPatientFormData {
-  name: string
-  heartRate: number
-  age: number
-  bed: number
-  status: "good" | "alert"
-}
+import type { Patient } from "../types/api"
 
 interface NewPatientDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  onSubmit: (data: NewPatientFormData) => void
+  onSubmit: (data: Omit<Patient, "notes">) => void
 }
 
 export function NewPatientDialog({ open, onOpenChange, onSubmit }: NewPatientDialogProps) {
-  const [formData, setFormData] = useState<NewPatientFormData>({
+  const [formData, setFormData] = useState<Omit<Patient, "notes">>({
+    id: "",
     name: "",
-    heartRate: 120,
+    heartRate: 80,
     age: 0,
     bed: 1,
     status: "good",
@@ -34,8 +27,9 @@ export function NewPatientDialog({ open, onOpenChange, onSubmit }: NewPatientDia
     onOpenChange(false)
     // Reset form
     setFormData({
+      id: "",
       name: "",
-      heartRate: 120,
+      heartRate: 80,
       age: 0,
       bed: 1,
       status: "good",
@@ -55,17 +49,6 @@ export function NewPatientDialog({ open, onOpenChange, onSubmit }: NewPatientDia
               id="name"
               value={formData.name}
               onChange={(e) => setFormData((prev) => ({ ...prev, name: e.target.value }))}
-              required
-            />
-          </div>
-
-          <div className="grid gap-2">
-            <Label htmlFor="heartRate">Heart Rate</Label>
-            <Input
-              id="heartRate"
-              type="number"
-              value={formData.heartRate}
-              onChange={(e) => setFormData((prev) => ({ ...prev, heartRate: Number.parseInt(e.target.value) }))}
               required
             />
           </div>
@@ -92,24 +75,17 @@ export function NewPatientDialog({ open, onOpenChange, onSubmit }: NewPatientDia
             />
           </div>
 
-          <div className="grid gap-2">
-            <Label>Status</Label>
-            <RadioGroup
-              value={formData.status}
-              onValueChange={(value: "good" | "alert") => setFormData((prev) => ({ ...prev, status: value }))}
-            >
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="good" id="good" />
-                <Label htmlFor="good">Good</Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="alert" id="alert" />
-                <Label htmlFor="alert">Alert</Label>
-              </div>
-            </RadioGroup>
-          </div>
-
-          <Button type="submit" className="mt-4">
+          <Button
+            type="submit"
+            className="mt-4"
+            onClick={() => {
+              // Generate a unique ID when submitting
+              setFormData((prev) => ({
+                ...prev,
+                id: Math.random().toString(36).substr(2, 9),
+              }))
+            }}
+          >
             Add Patient
           </Button>
         </form>

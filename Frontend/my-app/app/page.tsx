@@ -1,5 +1,5 @@
-import { InfoCard } from "@/components/info-card"; // Corrected import
+import { InfoCard }  from "@/components/info-card"
 
 export default function Page() {
-  return <InfoCard />; // Corrected JSX
+  return < InfoCard  />
 }
