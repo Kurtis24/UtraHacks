@@ -1,0 +1,48 @@
+.patient-card {
+    border: 1px solid #444;
+    padding: 15px;
+    border-radius: 8px;
+    background-color: #333;
+    color: white;
+    position: relative; /* For positioning the status dot */
+  }
+  
+  .patient-card h2 {
+    font-size: 18px;
+    margin-bottom: 10px;
+  }
+  
+  .patient-card p {
+    margin: 5px 0;
+  }
+  
+  .status-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    position: absolute;
+    top: 15px;
+    right: 15px;
+  }
+  
+  .status-dot.active {
+    background-color: green; /* Green dot for active status */
+  }
+  
+  .status-dot.inactive {
+    background-color: red; /* Red dot for inactive status */
+  }
+  
+  .delete-button {
+    margin-top: 10px;
+    padding: 5px 10px;
+    background-color: #ff4d4d;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  
+  .delete-button:hover {
+    background-color: #cc0000;
+  }

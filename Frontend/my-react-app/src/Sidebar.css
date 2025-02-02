@@ -1,0 +1,56 @@
+.sidebar {
+    width: 250px; /* Adjust the width as needed */
+    background-color: black; /* Match the background color */
+    color: white;
+    padding: 20px;
+    position: fixed;
+    top: 20px; /* Add some space from the top */
+    right: 20px; /* Add some space from the right */
+    border: 1px solid #444; /* Add a border for definition */
+    border-radius: 10px; /* Rounded corners for a square-like appearance */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Add a subtle shadow */
+    height: auto; /* Let the height adjust to content */
+    max-height: 90vh; /* Prevent it from being too tall */
+    overflow-y: auto; /* Add scroll if content overflows */
+  }
+  
+  .sidebar h2 {
+    margin-top: 0;
+    font-size: 20px;
+    color: #28a745; /* Green color for the header */
+  }
+  
+  .sidebar ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  
+  .sidebar li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    padding: 10px;
+    background-color: #222; /* Dark background for list items */
+    border-radius: 5px; /* Rounded corners for list items */
+  }
+  
+  .sidebar li span {
+    flex: 1;
+    font-size: 14px;
+  }
+  
+  .check-button {
+    background-color: #28a745; /* Green color for the button */
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 5px 10px;
+    cursor: pointer;
+    font-size: 12px;
+  }
+  
+  .check-button:hover {
+    background-color: #218838; /* Darker green on hover */
+  }

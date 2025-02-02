@@ -1,0 +1,59 @@
+/* Set the background to black and text to white */
+body {
+  background-color: black;
+  color: white;
+  margin: 0;
+  font-family: Arial, sans-serif;
+}
+
+.app {
+  display: flex;
+  min-height: 100vh;
+  gap: 20px; /* Add spacing between sidebar and main content */
+  padding: 20px; /* Add padding around the entire app */
+  position: relative; /* For positioning the toggle button */
+}
+
+.main-content {
+  flex: 1; /* Take up remaining space */
+  display: flex;
+  flex-direction: column;
+}
+
+.patient-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); /* Responsive grid */
+  gap: 20px;
+}
+
+.add-patient-button {
+  margin-top: 20px;
+  padding: 10px 20px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  align-self: flex-start; /* Align button to the left */
+}
+
+.add-patient-button:hover {
+  background-color: #0056b3;
+}
+
+.sidebar-toggle-button {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  padding: 10px 20px;
+  background-color: #28a745;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  z-index: 1000; /* Ensure it's above other elements */
+}
+
+.sidebar-toggle-button:hover {
+  background-color: #218838;
+}
