@@ -1,9 +1,6 @@
 ID,HR,Age,Bed,LastChecked,Status
-1,90,18,Bed 1,06:40:00,active
-2,174,18,Bed 2,06:51:00,inactive
-3,87,18,Bed 3,07:01:00,active
-4,80,18,Bed 4,07:11:00,active
-5,60,18,Bed 5,07:30:00,active
-6,30,18,Bed 6,07:55:00,active
-7,41,18,Bed 7,08:12:00,active
-
+0,60,18,Bed 0,12:44:16,active
+1,163,18,Bed 1,12:44:16,inactive
+2,160,18,Bed 2,12:44:16,inactive
+3,153,18,Bed 3,12:44:16,active
+4,126,18,Bed 4,12:44:16,active

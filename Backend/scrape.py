@@ -17,13 +17,14 @@ def main():
     
     data = []
     
-    for count, hr in enumerate(heart_rates, start=1):  
+    for count, hr in enumerate(heart_rates, start=0):  
         try:
+            ID = count
             HR = int(hr.strip())  # Convert to integer
             age = 18
             bed = f'Bed {count}'
             last_checked = datetime.now().strftime('%H:%M:%S')  # Format timestamp
-            status = 'active' if 30 < HR < 120 else 'inactive'
+            status = 'active' if 30 < HR < 160 else 'inactive'
             data.append([count, HR, age, bed, last_checked, status])
         except ValueError:
             print(f"Skipping invalid HR value: {hr}")
