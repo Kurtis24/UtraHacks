@@ -1,5 +1,6 @@
 import requests
 from bs4 import BeautifulSoup
+from datetime import datetime
 import csv
 from flask import Flask, send_file, jsonify
 from flask_cors import CORS
@@ -17,13 +18,13 @@ def scrape_website(url, output_file):
         data = []
         count = 1
         for item in soup.find_all('div', class_='data-class'):  # Adjust selector accordingly
-            name = item.find('h2').text.strip() if item.find('h2') else f'Name {count + 12}'
-            hr = int(item.find('span', class_='hr').text.strip()) if item.find('span', class_='hr') else 120
-            age = int(item.find('span', class_='age').text.strip()) if item.find('span', class_='age') else 12
-            bed = int(item.find('span', class_='bed').text.strip()) if item.find('span', class_='bed') else 1
-            last_checked = item.find('span', class_='last-checked').text.strip() if item.find('span', class_='last-checked') else 'John Doe, Just Added'
+            name = f'Name {count}'
+            hr = int(item.find('pre', class_='hr').text.strip()) if item.find('pre', class_='hr') else 120
+            age = 18
+            bed = f'Bed {count}'
+            last_checked = 'now = datetime.now()'
             status = 'active' if 30 < hr < 120 else 'inactive'
-            data.append([count, name, hr, age, bed, last_checked, status])
+            data.append([count, hr, age, bed, last_checked, status])
             count += 1
 
         # Save to CSV
@@ -55,5 +56,5 @@ def get_data():
         return jsonify({"error": str(e)})
 
 if __name__ == '__main__':
-    scrape_website('https://example.com', 'output.csv')
+    scrape_website('http://172.20.10.10:8080/GET_HEART_RATES', './Frontend/my-react-app/src/Data/output.csv')
     app.run(debug=True)

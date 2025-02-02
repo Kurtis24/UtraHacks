@@ -2,8 +2,8 @@
     border: 1px solid #444;
     padding: 15px;
     border-radius: 8px;
-    background-color: #333;
-    color: white;
+    background-color: white;
+    color: black;
     position: relative; /* For positioning the status dot */
   }
   
@@ -45,4 +45,19 @@
   
   .delete-button:hover {
     background-color: #cc0000;
+  }
+
+  .details-button { 
+    margin-top: 10px;
+    margin-right: 10px;
+    padding: 5px 10px;
+    background-color: gray;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+
+  .details-button:hover {
+    background-color: darkgray;
   }

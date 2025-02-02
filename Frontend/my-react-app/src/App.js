@@ -2,110 +2,78 @@ import React, { useState, useEffect } from 'react';
 import Papa from 'papaparse';
 import PatientCard from './component/PatientCard';
 import Sidebar from './Sidebar';
+import outputCsv from './Data/output.csv';
 import './App.css';
 
 const App = () => {
-  const [patients, setPatients] = useState([
-    
-  ]);
+  const [patients, setPatients] = useState([]);
+  const [notes, setNotes] = useState({});
+  const [selectedPatient, setSelectedPatient] = useState(null);
+  const [isSidebarVisible, setIsSidebarVisible] = useState(true);
 
-  const [isSidebarVisible, setIsSidebarVisible] = useState(true); // State to manage sidebar visibility
+  // Function to fetch and parse CSV file from local folder
+  useEffect(() => {
+    fetch(outputCsv) // Fetch the CSV file
+      .then((response) => response.text()) // Convert to text
+      .then((csvText) => {
+        Papa.parse(csvText, {
+          header: true,
+          dynamicTyping: true,
+          skipEmptyLines: true,
+          complete: (results) => {
+            if (results.errors.length) {
+              console.error('Error parsing CSV:', results.errors);
+            }
+
+            const formattedPatients = results.data.map((row, index) => ({
+              id: row.ID || index + 1,
+              hr: row.HR || 120,
+              age: row.Age || 18,
+              bed: row.Bed || `Bed ${index + 1}`,
+              lastChecked: row.LastChecked || 'Not Checked Yet',
+              status: row.Status || 'inactive',
+            }));
+
+            setPatients(formattedPatients);
+          },
+          error: (error) => {
+            console.error('Error parsing CSV:', error);
+          },
+        });
+      })
+      .catch((error) => console.error('Error loading CSV file:', error));
+  }, []);
+
+  // Function to trigger file input
+  const addNewPatient = () => {
+    document.getElementById('output.csv').click();
+  };
 
   // Function to toggle sidebar visibility
   const toggleSidebar = () => {
     setIsSidebarVisible(!isSidebarVisible);
   };
 
-  // Function to add new patients from a CSV file
-  const addNewPatient = () => {
-    // Trigger file input click
-    document.getElementById('./Data/output.csv').click();
-  };
-
-  // Function to handle file upload and parse CSV data
-  const handleFileUpload = (event) => {
-    const file = event.target.files[0];
-    if (file) {
-      Papa.parse(file, {
-        header: true, // Assumes the first row in the CSV is the header
-        dynamicTyping: true, // Automatically convert numeric values to numbers
-        complete: (results) => {
-          const newPatients = results.data.map((row, index) => ({
-            id: patients.length + index + 1,
-            name: row.Name || `Name ${patients.length + index + 13}`,
-            hr: row.HR || 120,
-            age: row.Age || 12,
-            bed: row.Bed || 1,
-            lastChecked: row.LastChecked || 'John Doe, Just Added',
-            status: row.Status || 'active',
-          }));
-          setPatients([...patients, ...newPatients]);
-        },
-        error: (error) => {
-          console.error('Error parsing CSV:', error);
-        },
-      });
+  // Function to view patient details and notes
+  const viewPatientDetails = (id) => {
+    const patient = patients.find((p) => p.id === id);
+    if (patient) {
+      setSelectedPatient(patient);
     }
   };
 
-  // Function to delete a patient
-  const deletePatient = (id) => {
-    setPatients(patients.filter((patient) => patient.id !== id));
+  // Function to update notes
+  const handleNoteChange = (id, newNote) => {
+    setNotes((prevNotes) => ({
+      ...prevNotes,
+      [id]: newNote,
+    }));
   };
 
-  // Function to update the last checked time for a patient
-  const handleCheck = (id) => {
-    const updatedPatients = patients.map((patient) =>
-      patient.id === id
-        ? { ...patient, lastChecked: `John Doe, ${new Date().toLocaleTimeString()}` }
-        : patient
-    );
-    setPatients(updatedPatients);
+  // Function to close the modal
+  const closeDetails = () => {
+    setSelectedPatient(null);
   };
-
-  // Automatically load data from a CSV file via API when the app loads
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const API_KEY = 'your_api_key_here'; // Replace with your actual API key
-        const response = await fetch('http://127.0.0.1:5000', {
-          headers: {
-            Authorization: `Bearer ${API_KEY}`,
-          },
-        });
-
-        if (!response.ok) {
-          throw new Error('Failed to fetch CSV data');
-        }
-
-        const csvData = await response.text();
-
-        Papa.parse(csvData, {
-          header: true,
-          dynamicTyping: true, // Automatically convert numeric values to numbers
-          complete: (results) => {
-            const newPatients = results.data.map((row, index) => ({
-              id: patients.length + index + 1,
-              name: row.Name || `Name ${patients.length + index + 13}`,
-              hr: row.HR || 120,
-              age: row.Age || 12,
-              bed: row.Bed || 1,
-              lastChecked: row.LastChecked || 'John Doe, Just Added',
-              status: row.Status || 'active',
-            }));
-            setPatients([...patients, ...newPatients]);
-          },
-          error: (error) => {
-            console.error('Error parsing CSV:', error);
-          },
-        });
-      } catch (error) {
-        console.error('Error fetching CSV file:', error);
-      }
-    };
-
-    fetchData();
-  }, []); // Empty dependency array ensures this runs only once on mount
 
   return (
     <div className="app">
@@ -114,20 +82,22 @@ const App = () => {
         <h1>Patient Count: {patients.length}</h1>
         <div className="patient-grid">
           {patients.map((patient) => (
-            <PatientCard key={patient.id} patient={patient} onDelete={deletePatient} />
+            <PatientCard
+              key={patient.id}
+              patient={patient}
+              onDelete={() => setPatients(patients.filter((p) => p.id !== patient.id))}
+              onViewDetails={viewPatientDetails}
+            />
           ))}
         </div>
         <button onClick={addNewPatient} className="add-patient-button">
           + Add New Patient
         </button>
+
+
+
         {/* Hidden file input for CSV upload */}
-        <input
-          id="csv-file-input"
-          type="file"
-          accept=".csv"
-          style={{ display: 'none' }}
-          onChange={handleFileUpload}
-        />
+        
       </div>
 
       {/* Sidebar toggle button */}
@@ -136,7 +106,34 @@ const App = () => {
       </button>
 
       {/* Sidebar */}
-      {isSidebarVisible && <Sidebar patients={patients} onCheck={handleCheck} />}
+      {isSidebarVisible && <Sidebar patients={patients} />}
+
+      {/* Patient Details Modal */}
+      {selectedPatient && (
+        <div className="modal">
+          <div className="modal-content">
+            {/* Patient Header */}
+            <div className="patient-header">
+              <h2>Patient {selectedPatient.id} Details</h2>
+              <span className="viewing-patient">Viewing Patient {selectedPatient.id}</span>
+            </div>
+            <p>HR: {selectedPatient.hr}</p>
+            <p>Age: {selectedPatient.age}</p>
+            <p>Bed: {selectedPatient.bed}</p>
+            <p> </p>
+            <p> </p>
+
+            {/* Note-taking section */}
+            <textarea
+              placeholder="Write notes here..."
+              value={notes[selectedPatient.id] || ''}
+              onChange={(e) => handleNoteChange(selectedPatient.id, e.target.value)}
+            />
+
+            <button onClick={closeDetails} className="close-button">Close</button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
