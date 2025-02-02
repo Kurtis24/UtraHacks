@@ -1,1 +1,4 @@
-ID,Name,HR,Age,Bed,LastChecked,Status
+ID,HR,Bed,LastChecked,Status
+1,51, 2, 9:37 AM, active
+1,51, 2, 9:37 AM, active
+1,51, 2, 9:37 AM, active

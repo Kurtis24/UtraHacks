@@ -6,10 +6,7 @@ import './App.css';
 
 const App = () => {
   const [patients, setPatients] = useState([
-    { id: 1, name: 'John Doe', hr: 120, age: 25, bed: 1, lastChecked: 'John Doe, 10:00 AM', status: 'active' },
-    { id: 2, name: 'Jane Doe', hr: 110, age: 30, bed: 2, lastChecked: 'John Doe, 11:00 AM', status: 'active' },
-    { id: 3, name: 'Alice', hr: 130, age: 35, bed: 3, lastChecked: 'John Doe, 12:00 PM', status: 'active' },
-    { id: 4, name: 'Bob', hr: 140, age: 40, bed: 4, lastChecked: 'John Doe, 1:00 PM', status: 'active' },
+    
   ]);
 
   const [isSidebarVisible, setIsSidebarVisible] = useState(true); // State to manage sidebar visibility
@@ -22,7 +19,7 @@ const App = () => {
   // Function to add new patients from a CSV file
   const addNewPatient = () => {
     // Trigger file input click
-    document.getElementById('output.csv').click();
+    document.getElementById('./Data/output.csv').click();
   };
 
   // Function to handle file upload and parse CSV data
@@ -66,19 +63,26 @@ const App = () => {
     setPatients(updatedPatients);
   };
 
-  // Automatically load data from a CSV file when the app loads
+  // Automatically load data from a CSV file via API when the app loads
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch('./Data/data.csv'); // Path to your CSV file
-        const reader = response.body.getReader();
-        const result = await reader.read();
-        const decoder = new TextDecoder('utf-8');
-        const csvData = decoder.decode(result.value);
+        const API_KEY = 'your_api_key_here'; // Replace with your actual API key
+        const response = await fetch('http://127.0.0.1:5000', {
+          headers: {
+            Authorization: `Bearer ${API_KEY}`,
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to fetch CSV data');
+        }
+
+        const csvData = await response.text();
 
         Papa.parse(csvData, {
           header: true,
-          dynamicTyping: true,
+          dynamicTyping: true, // Automatically convert numeric values to numbers
           complete: (results) => {
             const newPatients = results.data.map((row, index) => ({
               id: patients.length + index + 1,
